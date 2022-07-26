@@ -1,34 +1,50 @@
 /* eslint-disable react/react-in-jsx-scope, react/jsx-filename-extension, no-unused-vars */
 
 /* @jsx createElement */
+import { createElement, appRender, calculator } from './module.js';
 
-function createElement(tagName, props, ...children) {
-  const element = document.createElement(tagName);
+const addNumberList = [1,2,3,4,5,6,7,8,9,0];
+const operatorList = ['+','-','/','*','='];
 
-  Object.entries(props || {}).forEach(([key, value]) => {
-    element[key.toLowerCase()] = value;
-  });
+function render({ count, addNumber, prevOperator }) {
 
-  children.flat().forEach((child) => {
-    if (child instanceof Node) {
-      element.appendChild(child);
-      return;
-    }
-    element.appendChild(document.createTextNode(child));
-  });
+  const handleClickButton = (e) => {
+    addNumber += e.target.value;
+    count = calculator({ count, addNumber: Number(addNumber) },  prevOperator);
+    render({ count, addNumber, prevOperator});
+  }
 
-  return element;
-}
+  const handleClickOperator = (e) => {
+    render({ count, addNumber,  prevOperator: e.target.value });
+  }
 
-function render() {
   const element = (
     <div>
       <p>간단 계산기</p>
+      <div>
+        {addNumber > 0 ? addNumber : prevOperator === '=' ? '' : prevOperator}
+        {prevOperator === '=' ? count : ''}
+      </div>
+      <div>
+        {
+          addNumberList.map(addNumber => {
+            return(
+              <button value={addNumber} onClick={handleClickButton}>{addNumber}</button>
+            )
+          })
+        }
+      </div>
+      <div>
+        {operatorList.map(operator => {
+          return(
+            <button value={operator} onClick={handleClickOperator}>{operator}</button>
+          )
+        })}
+      </div>
     </div>
   );
 
-  document.getElementById('app').textContent = '';
-  document.getElementById('app').appendChild(element);
+  appRender(element);
 }
 
-render();
+render({ count: 0, addNumber: '', prevOperator: '' });
